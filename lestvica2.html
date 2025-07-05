@@ -1,0 +1,1161 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Лествица Чинов - Драхенланд</title>
+    <style>
+        :root {
+            --parchment: #f5e9c9;
+            --ink: #2c1a0a;
+            --gold: #c9a227;
+            --blood: #8a0303;
+            --steel: #6c757d;
+            --earth: #5d4037;
+            --shadow: rgba(0,0,0,0.7);
+            --green: #2e7d32;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Times New Roman', serif;
+        }
+        
+        body {
+            background-color: var(--earth);
+            color: var(--ink);
+            background-image: 
+                linear-gradient(rgba(0,0,0,0.7), rgba(0,0,0,0.7)), 
+                url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" width="100" height="100" opacity="0.1"><rect fill="none" stroke="%23000" stroke-width="2" x="10" y="10" width="80" height="80"/></svg>');
+            background-size: 20px 20px;
+            min-height: 100vh;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background-color: var(--parchment);
+            padding: 30px;
+            border: 3px double var(--gold);
+            box-shadow: 0 10px 30px var(--shadow);
+            position: relative;
+        }
+        
+        .container::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 5px;
+            background: linear-gradient(90deg, var(--gold), var(--blood), var(--steel), var(--gold));
+        }
+        
+        header {
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 2px solid var(--ink);
+            margin-bottom: 20px;
+            position: relative;
+        }
+        
+        h1 {
+            color: var(--blood);
+            font-size: 2.8rem;
+            text-shadow: 2px 2px 4px var(--shadow);
+            letter-spacing: 3px;
+            margin-bottom: 10px;
+            font-variant: small-caps;
+        }
+        
+        .subtitle {
+            color: var(--steel);
+            font-style: italic;
+            font-size: 1.2rem;
+        }
+        
+        .game-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 25px;
+            margin-bottom: 30px;
+        }
+        
+        @media (max-width: 768px) {
+            .game-area {
+                grid-template-columns: 1fr;
+            }
+        }
+        
+        .status-panel {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--ink);
+            padding: 20px;
+            position: relative;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .status-panel h2 {
+            text-align: center;
+            color: var(--blood);
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 5px;
+            font-variant: small-caps;
+        }
+        
+        .status-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+        }
+        
+        .status-item {
+            margin-bottom: 12px;
+            padding-bottom: 5px;
+            border-bottom: 1px dashed var(--steel);
+        }
+        
+        .status-value {
+            font-weight: bold;
+            color: var(--blood);
+            float: right;
+        }
+        
+        .status-bar {
+            height: 10px;
+            background: #ddd;
+            margin-top: 5px;
+            position: relative;
+            border-radius: 2px;
+            overflow: hidden;
+        }
+        
+        .status-fill {
+            height: 100%;
+            background: var(--gold);
+        }
+        
+        .actions-panel {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--ink);
+            padding: 20px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .actions-panel h2 {
+            text-align: center;
+            color: var(--blood);
+            margin-bottom: 15px;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 5px;
+            font-variant: small-caps;
+        }
+        
+        .action-buttons {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 20px;
+        }
+        
+        button {
+            background: var(--steel);
+            color: white;
+            border: none;
+            padding: 12px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s;
+            box-shadow: 0 3px 5px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
+            border-radius: 2px;
+        }
+        
+        button:hover:not(:disabled) {
+            background: var(--gold);
+            color: var(--ink);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 8px rgba(0,0,0,0.3);
+        }
+        
+        button:active:not(:disabled) {
+            transform: translateY(1px);
+        }
+        
+        button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        button.success {
+            background: var(--green);
+        }
+        
+        button.danger {
+            background: var(--blood);
+        }
+        
+        button::after {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+            transition: 0.5s;
+        }
+        
+        button:hover::after {
+            left: 100%;
+        }
+        
+        .event-log {
+            background: rgba(0, 0, 0, 0.05);
+            border: 1px solid var(--ink);
+            padding: 20px;
+            height: 300px;
+            overflow-y: auto;
+            font-family: 'Courier New', monospace;
+            line-height: 1.5;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .event-log p {
+            margin-bottom: 10px;
+            padding-bottom: 10px;
+            border-bottom: 1px dashed rgba(0,0,0,0.1);
+        }
+        
+        .event-log p:last-child {
+            border-bottom: none;
+        }
+        
+        .ladder-section {
+            background: rgba(255, 255, 255, 0.7);
+            border: 1px solid var(--ink);
+            padding: 20px;
+            margin-top: 25px;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.1);
+        }
+        
+        .ladder-section h2 {
+            text-align: center;
+            color: var(--blood);
+            margin-bottom: 20px;
+            border-bottom: 1px solid var(--ink);
+            padding-bottom: 5px;
+            font-variant: small-caps;
+        }
+        
+        .ladder-container {
+            position: relative;
+            height: 40px;
+            margin: 20px 0;
+        }
+        
+        .ladder-progress {
+            height: 40px;
+            background: #ddd;
+            position: relative;
+            border-radius: 3px;
+            overflow: hidden;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.2);
+        }
+        
+        .ladder-fill {
+            height: 100%;
+            background: linear-gradient(to right, var(--steel), var(--gold));
+            width: 0%;
+            transition: width 0.8s ease;
+        }
+        
+        .ladder-marks {
+            display: flex;
+            justify-content: space-between;
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            padding: 5px 10px;
+            font-size: 0.9rem;
+            color: var(--ink);
+            font-weight: bold;
+        }
+        
+        .ladder-marks span {
+            background: rgba(245, 233, 201, 0.7);
+            padding: 0 5px;
+        }
+        
+        .ladder-current {
+            position: absolute;
+            top: -25px;
+            transform: translateX(-50%);
+            font-weight: bold;
+            color: var(--blood);
+            text-shadow: 1px 1px 1px rgba(255,255,255,0.7);
+            white-space: nowrap;
+        }
+        
+        footer {
+            text-align: center;
+            margin-top: 30px;
+            padding-top: 15px;
+            border-top: 1px solid var(--ink);
+            color: var(--steel);
+            font-style: italic;
+        }
+        
+        .symbol {
+            display: inline-block;
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            text-align: center;
+            line-height: 25px;
+            font-weight: bold;
+            margin: 0 5px;
+            vertical-align: middle;
+        }
+        
+        .symbol-knight { background: var(--gold); color: var(--ink); }
+        .symbol-noble { background: var(--blood); color: white; }
+        .symbol-commoner { background: var(--steel); color: white; }
+        .symbol-artifact { background: purple; color: white; }
+        
+        .achievement {
+            background: rgba(201, 162, 39, 0.1);
+            border-left: 3px solid var(--gold);
+            padding: 10px;
+            margin: 10px 0;
+            font-style: italic;
+        }
+        
+        .game-over {
+            background: rgba(138, 3, 3, 0.2);
+            border: 2px solid var(--blood);
+            padding: 20px;
+            text-align: center;
+            margin-top: 20px;
+            font-weight: bold;
+            font-size: 1.2rem;
+        }
+        
+        .restart-button {
+            background: var(--blood);
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            margin-top: 15px;
+            cursor: pointer;
+            font-weight: bold;
+            font-size: 1rem;
+        }
+        
+        .restart-button:hover {
+            background: var(--gold);
+            color: var(--ink);
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>ЛЕСТВИЦА ЧИНОВ</h1>
+            <p class="subtitle">Восхождение по социальной иерархии Драхенланда</p>
+        </header>
+        
+        <div class="game-area">
+            <div class="status-panel">
+                <h2>Состояние</h2>
+                <div class="status-grid">
+                    <div class="status-item">
+                        Статус: <span class="status-value" id="current-status">Холоп</span>
+                    </div>
+                    <div class="status-item">
+                        ДСМ: <span class="status-value" id="dsm">20</span>
+                    </div>
+                    <div class="status-item">
+                        Репутация: <span class="status-value" id="reputation">10</span>
+                        <div class="status-bar">
+                            <div class="status-fill" id="reputation-bar" style="width: 10%;"></div>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        Отношения с Церковью: <span class="status-value" id="church">50</span>
+                        <div class="status-bar">
+                            <div class="status-fill" id="church-bar" style="width: 50%;"></div>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        Отношения с Королем: <span class="status-value" id="king">10</span>
+                        <div class="status-bar">
+                            <div class="status-fill" id="king-bar" style="width: 10%;"></div>
+                        </div>
+                    </div>
+                    <div class="status-item">
+                        Земли: <span class="status-value" id="lands">0</span>
+                    </div>
+                    <div class="status-item">
+                        Артефакты: <span class="status-value" id="artifacts">0</span>
+                    </div>
+                    <div class="status-item">
+                        Возраст: <span class="status-value" id="age">16</span> лет
+                    </div>
+                    <div class="status-item">
+                        Год: <span class="status-value" id="year">1</span>
+                    </div>
+                    <div class="status-item">
+                        Долг: <span class="status-value" id="debt">100</span> ДСМ
+                    </div>
+                </div>
+            </div>
+            
+            <div class="actions-panel">
+                <h2>Действия</h2>
+                <div class="action-buttons" id="action-buttons">
+                    <!-- Кнопки действий будут добавляться динамически -->
+                </div>
+                
+                <div class="event-log" id="event-log">
+                    <p>Вы начинаете свой путь как холоп в мире Драхенланда. Ваша цель - подняться по Лествице Чинов от самого низа до вершины.</p>
+                    <p>Вам 16 лет. Ваш господин, барон фон Штарк, поручил вам работу в теплицах. Выберите действие для начала восхождения.</p>
+                </div>
+            </div>
+        </div>
+        
+        <div class="ladder-section">
+            <h2>Прогресс восхождения</h2>
+            <div class="ladder-container">
+                <div class="ladder-progress">
+                    <div class="ladder-fill" id="ladder-fill"></div>
+                </div>
+                <div class="ladder-marks">
+                    <span>Холоп</span>
+                    <span>Король</span>
+                </div>
+                <div class="ladder-current" id="ladder-current">Холоп</div>
+            </div>
+        </div>
+        
+        <div id="game-over-container" style="display: none;">
+            <!-- Контейнер для сообщения об окончании игры -->
+        </div>
+        
+        <footer>
+            Утверждено Печатью Августа де Гри, Короля Драхенланда, в лето 484 от Выхода
+        </footer>
+    </div>
+
+    <script>
+        // Данные о статусах в соответствии с Правдой Земель Драхенландских
+        const statuses = [
+            { name: "Холоп", minReputation: 0, minDsm: 0, symbol: "H", canBuyFreedom: true },
+            { name: "Вольный Человек", minReputation: 20, minDsm: 50, symbol: "В", canBuyFreedom: false },
+            { name: "Оруженосец", minReputation: 30, minDsm: 100, symbol: "О", canBuyFreedom: false },
+            { name: "Однощитовой Рыцарь", minReputation: 50, minDsm: 300, symbol: "Р", canBuyFreedom: false },
+            { name: "Рыцарь", minReputation: 70, minDsm: 600, symbol: "Р", canBuyFreedom: false },
+            { name: "Баронет", minReputation: 80, minDsm: 1000, symbol: "Б", canBuyFreedom: false },
+            { name: "Барон", minReputation: 90, minDsm: 2000, symbol: "Б", canBuyFreedom: false },
+            { name: "Виконт", minReputation: 100, minDsm: 4000, symbol: "В", canBuyFreedom: false },
+            { name: "Маркиз", minReputation: 120, minDsm: 6000, symbol: "М", canBuyFreedom: false },
+            { name: "Граф", minReputation: 150, minDsm: 10000, symbol: "Г", canBuyFreedom: false },
+            { name: "Маркграф", minReputation: 180, minDsm: 15000, symbol: "М", canBuyFreedom: false },
+            { name: "Князь", minReputation: 200, minDsm: 20000, symbol: "К", canBuyFreedom: false },
+            { name: "Герцог", minReputation: 250, minDsm: 30000, symbol: "Г", canBuyFreedom: false },
+            { name: "Король", minReputation: 300, minDsm: 50000, symbol: "К", canBuyFreedom: false }
+        ];
+
+        // Игровые переменные
+        let gameState = {
+            statusIndex: 0,
+            dsm: 20,
+            reputation: 10,
+            church: 50,
+            king: 10,
+            lands: 0,
+            artifacts: 0,
+            age: 16,
+            year: 1,
+            eventLog: [],
+            achievements: [],
+            master: "Барон фон Штарк",
+            workDebt: 100,
+            escapeRisk: 0,
+            gameOver: false
+        };
+
+        // Элементы DOM
+        const currentStatusEl = document.getElementById('current-status');
+        const dsmEl = document.getElementById('dsm');
+        const reputationEl = document.getElementById('reputation');
+        const churchEl = document.getElementById('church');
+        const kingEl = document.getElementById('king');
+        const landsEl = document.getElementById('lands');
+        const artifactsEl = document.getElementById('artifacts');
+        const ageEl = document.getElementById('age');
+        const yearEl = document.getElementById('year');
+        const debtEl = document.getElementById('debt');
+        const reputationBarEl = document.getElementById('reputation-bar');
+        const churchBarEl = document.getElementById('church-bar');
+        const kingBarEl = document.getElementById('king-bar');
+        const ladderFillEl = document.getElementById('ladder-fill');
+        const ladderCurrentEl = document.getElementById('ladder-current');
+        const actionButtonsEl = document.getElementById('action-buttons');
+        const eventLogEl = document.getElementById('event-log');
+        const gameOverContainer = document.getElementById('game-over-container');
+
+        // Инициализация игры
+        function initGame() {
+            updateUI();
+            logEvent("Вы начинаете свой путь как холоп в мире Драхенланда.");
+            logEvent("Ваш господин - " + gameState.master + ". Вам нужно отработать долг или выкупиться.");
+            generateActions();
+        }
+
+        // Обновление интерфейса
+        function updateUI() {
+            const currentStatus = statuses[gameState.statusIndex];
+            
+            currentStatusEl.textContent = currentStatus.name;
+            dsmEl.textContent = gameState.dsm;
+            reputationEl.textContent = gameState.reputation;
+            churchEl.textContent = gameState.church;
+            kingEl.textContent = gameState.king;
+            landsEl.textContent = gameState.lands;
+            artifactsEl.textContent = gameState.artifacts;
+            ageEl.textContent = gameState.age;
+            yearEl.textContent = gameState.year;
+            debtEl.textContent = gameState.workDebt;
+            
+            // Обновление прогресс-баров
+            reputationBarEl.style.width = Math.min(100, gameState.reputation / 3) + '%';
+            churchBarEl.style.width = gameState.church + '%';
+            kingBarEl.style.width = gameState.king + '%';
+            
+            // Прогресс по лествице
+            const progress = (gameState.statusIndex / (statuses.length - 1)) * 100;
+            ladderFillEl.style.width = progress + '%';
+            ladderCurrentEl.textContent = currentStatus.name;
+            ladderCurrentEl.style.left = progress + '%';
+        }
+
+        // Логирование событий
+        function logEvent(message) {
+            const eventEntry = document.createElement('p');
+            eventEntry.textContent = `[Год ${gameState.year}, ${gameState.age} лет]: ${message}`;
+            eventLogEl.appendChild(eventEntry);
+            eventLogEl.scrollTop = eventLogEl.scrollHeight;
+        }
+
+        // Генерация доступных действий
+        function generateActions() {
+            actionButtonsEl.innerHTML = '';
+            const currentStatus = statuses[gameState.statusIndex];
+            
+            // Действия для холопа
+            if (gameState.statusIndex === 0) {
+                addActionButton("Усердно работать", () => workHard(), true, "work");
+                addActionButton("Выслужить доверие", () => gainTrust(), true, "trust");
+                addActionButton("Выкупиться (100 ДСМ)", () => buyFreedom(), gameState.dsm >= 100, "success");
+                
+                // Рискованные действия для холопа
+                addActionButton("Воровать припасы", () => stealSupplies(), true, "steal");
+                addActionButton("Сбежать", () => escape(), true, "danger");
+            }
+            
+            // Общие действия
+            addActionButton("Пожертвовать Церкви", () => donateToChurch(), gameState.dsm >= 20, "church");
+            addActionButton("Торговать", () => performTrade(), gameState.statusIndex >= 1, "trade");
+            
+            // Действия для свободных сословий
+            if (gameState.statusIndex >= 1) {
+                addActionButton("Военная служба", () => militaryService(), true, "military");
+                addActionButton("Служба при дворе", () => courtService(), true, "court");
+                addActionButton("Заключить брак", () => marry(), gameState.dsm >= 100, "marriage");
+            }
+            
+            if (gameState.statusIndex >= 4) {
+                addActionButton("Купить землю", () => buyLand(), gameState.dsm >= 500, "land");
+                addActionButton("Исследовать руины", () => exploreRuins(), true, "explore");
+            }
+            
+            // Действие для завершения года
+            addActionButton("Завершить год", () => endYear(), true, "end-year");
+        }
+
+        function addActionButton(text, action, enabled = true, type = "") {
+            const button = document.createElement('button');
+            button.textContent = text;
+            button.disabled = !enabled;
+            
+            if (type === "success") button.classList.add("success");
+            if (type === "danger") button.classList.add("danger");
+            
+            button.addEventListener('click', action);
+            actionButtonsEl.appendChild(button);
+        }
+
+        // Действия для холопов
+        function workHard() {
+            const success = Math.random() > 0.2;
+            let message;
+            
+            if (success) {
+                const dsmGain = Math.floor(Math.random() * 15) + 5;
+                const reputationGain = Math.floor(Math.random() * 3) + 1;
+                gameState.dsm += dsmGain;
+                gameState.reputation += reputationGain;
+                gameState.workDebt = Math.max(0, gameState.workDebt - 10);
+                
+                message = `Вы усердно работали в теплицах. Заработано ${dsmGain} ДСМ. Долг уменьшен.`;
+                
+                // Шанс быть замеченным господином
+                if (Math.random() > 0.8) {
+                    const bonus = Math.floor(Math.random() * 20) + 10;
+                    gameState.dsm += bonus;
+                    message += ` ${gameState.master} заметил ваше усердие и наградил ${bonus} ДСМ!`;
+                }
+            } else {
+                gameState.reputation -= 2;
+                message = "Вы не справились с работой. Господин недоволен.";
+                
+                // Шанс наказания
+                if (Math.random() > 0.7) {
+                    const punishment = Math.floor(Math.random() * 15) + 5;
+                    gameState.dsm = Math.max(0, gameState.dsm - punishment);
+                    message += ` Вас оштрафовали на ${punishment} ДСМ.`;
+                }
+            }
+            
+            logEvent(message);
+            updateUI();
+            checkFreedomConditions();
+        }
+
+        function gainTrust() {
+            const success = Math.random() > 0.4;
+            let message;
+            
+            if (success) {
+                const trustGain = Math.floor(Math.random() * 10) + 5;
+                gameState.reputation += trustGain;
+                message = `Вы заслужили доверие ${gameState.master}. Репутация +${trustGain}.`;
+                
+                // Шанс получить особое поручение
+                if (Math.random() > 0.6) {
+                    const reward = Math.floor(Math.random() * 30) + 15;
+                    gameState.dsm += reward;
+                    message += ` Вам доверили важное поручение и наградили ${reward} ДСМ!`;
+                }
+            } else {
+                gameState.reputation -= 5;
+                message = "Ваши попытки выслужиться раздражают господина. Репутация снижена.";
+            }
+            
+            logEvent(message);
+            updateUI();
+            checkFreedomConditions();
+        }
+
+        function buyFreedom() {
+            if (gameState.dsm < 100) {
+                logEvent("У вас недостаточно ДСМ для выкупа! Нужно 100 ДСМ.");
+                return;
+            }
+            
+            gameState.dsm -= 100;
+            gameState.statusIndex = 1; // Вольный человек
+            
+            logEvent(`Вы заплатили ${gameState.master} 100 ДСМ и получили вольную!`);
+            logEvent("Теперь вы Вольный Человек и можете выбирать свой путь.");
+            
+            // Добавляем начальный капитал для свободного человека
+            gameState.dsm += 50;
+            logEvent("Вы получили 50 ДСМ начального капитала для новой жизни.");
+            
+            updateUI();
+            generateActions();
+            checkForAchievements();
+        }
+
+        function stealSupplies() {
+            const success = Math.random() > 0.6;
+            let message;
+            
+            if (success) {
+                const stolen = Math.floor(Math.random() * 30) + 20;
+                gameState.dsm += stolen;
+                message = `Вы украли припасы и продали их на черном рынке. Получено ${stolen} ДСМ.`;
+                
+                // Риск быть пойманным
+                if (Math.random() > 0.7) {
+                    gameState.reputation -= 15;
+                    const punishment = Math.floor(Math.random() * 40) + 20;
+                    gameState.dsm = Math.max(0, gameState.dsm - punishment);
+                    
+                    message += ` Но вас поймали! Штраф ${punishment} ДСМ, репутация снижена.`;
+                    
+                    // Шанс телесного наказания
+                    if (Math.random() > 0.5) {
+                        gameState.age++; // Потеря года на восстановление
+                        message += " Вас жестоко наказали, вы потеряли год.";
+                    }
+                }
+            } else {
+                gameState.reputation -= 10;
+                message = "Вас поймали на краже! Репутация значительно снижена.";
+                
+                // Серьезное наказание
+                const punishment = Math.floor(Math.random() * 50) + 30;
+                gameState.dsm = Math.max(0, gameState.dsm - punishment);
+                gameState.workDebt += 50; // Увеличение долга
+                
+                message += ` Штраф ${punishment} ДСМ, ваш долг увеличен.`;
+                
+                // Шанс попасть в кабалу
+                if (gameState.dsm === 0 && Math.random() > 0.3) {
+                    message += " За долги вас продали в кабалу!";
+                    gameState.workDebt = 200;
+                }
+            }
+            
+            logEvent(message);
+            updateUI();
+        }
+
+        function escape() {
+            const success = Math.random() > 0.3;
+            
+            if (success) {
+                logEvent("Вы успешно сбежали от господина!");
+                logEvent("Теперь вы беглый холоп. Ваша репутация испорчена, но вы свободны.");
+                
+                gameState.statusIndex = 1; // Вольный человек (де-факто)
+                gameState.reputation = 5; // Очень низкая репутация
+                gameState.dsm = Math.max(10, gameState.dsm); // Оставляем только 10 ДСМ
+                
+                logEvent("Вы начинаете новую жизнь под чужим именем в другом городе.");
+                
+                // Шанс быть пойманным позже
+                gameState.escapeRisk = 30; // 30% шанс быть пойманным каждый год
+            } else {
+                logEvent("Попытка побега провалилась!");
+                
+                // Жесткое наказание
+                gameState.reputation -= 25;
+                const punishment = Math.floor(Math.random() * 70) + 50;
+                gameState.dsm = Math.max(0, gameState.dsm - punishment);
+                gameState.workDebt += 100;
+                gameState.age++; // Потеря года на восстановление после наказания
+                
+                logEvent(`Вас жестоко наказали: штраф ${punishment} ДСМ, долг увеличен.`);
+                logEvent("Вы потеряли год на восстановление после наказания.");
+                
+                // Шанс попасть в каторгу
+                if (Math.random() > 0.5) {
+                    logEvent("За попытку побега вас отправили на каторжные работы!");
+                    gameState.workDebt = 300;
+                }
+            }
+            
+            updateUI();
+            generateActions();
+        }
+
+        function checkFreedomConditions() {
+            // Автоматическое освобождение при выполнении условий
+            if (gameState.statusIndex === 0 && gameState.workDebt <= 0 && gameState.reputation >= 30) {
+                logEvent(`${gameState.master} доволен вашей службой и дарует вам вольную!`);
+                gameState.statusIndex = 1;
+                gameState.dsm += 30; // Подарок на новую жизнь
+                logEvent("Вы получили 30 ДСМ на обустройство новой жизни.");
+                updateUI();
+                generateActions();
+                checkForAchievements();
+            }
+        }
+
+        // Действия для свободных сословий
+        function donateToChurch() {
+            if (gameState.dsm < 20) {
+                logEvent("У вас недостаточно ДСМ для пожертвования!");
+                return;
+            }
+            
+            const amount = Math.min(gameState.dsm, Math.floor(Math.random() * 50) + 20);
+            gameState.dsm -= amount;
+            gameState.church = Math.min(100, gameState.church + 10);
+            
+            logEvent(`Вы пожертвовали Церкви ${amount} ДСМ. Отношения с Церковью улучшились.`);
+            updateUI();
+        }
+
+        function performTrade() {
+            const success = Math.random() > 0.3;
+            let message;
+            
+            if (success) {
+                const profit = Math.floor(Math.random() * 50) + 20;
+                gameState.dsm += profit;
+                message = `Торговая операция успешна! Вы заработали ${profit} ДСМ.`;
+            } else {
+                const loss = Math.floor(Math.random() * 30) + 10;
+                gameState.dsm = Math.max(0, gameState.dsm - loss);
+                message = `Торговый караван разграблен мутантами! Вы потеряли ${loss} ДСМ.`;
+            }
+            
+            logEvent(message);
+            updateUI();
+        }
+
+        function militaryService() {
+            const success = Math.random() > 0.4;
+            let message;
+            
+            if (success) {
+                const reputationGain = Math.floor(Math.random() * 20) + 10;
+                const dsmGain = Math.floor(Math.random() * 100) + 50;
+                gameState.reputation += reputationGain;
+                gameState.dsm += dsmGain;
+                message = `Вы отличились в бою с мутантами! Репутация +${reputationGain}, ДСМ +${dsmGain}.`;
+                
+                // Шанс повышения статуса
+                if (Math.random() > 0.7 && gameState.statusIndex < statuses.length - 1) {
+                    gameState.statusIndex++;
+                    message += ` За заслуги вы произведены в ${statuses[gameState.statusIndex].name}!`;
+                    checkForAchievements();
+                }
+            } else {
+                const reputationLoss = Math.floor(Math.random() * 15) + 5;
+                const dsmLoss = Math.floor(Math.random() * 50) + 20;
+                gameState.reputation = Math.max(0, gameState.reputation - reputationLoss);
+                gameState.dsm = Math.max(0, gameState.dsm - dsmLoss);
+                message = `Вы потерпели поражение в стычке. Репутация -${reputationLoss}, ДСМ -${dsmLoss}.`;
+                
+                // Шанс ранения (пропуск года)
+                if (Math.random() > 0.5) {
+                    gameState.age++;
+                    message += ` Вы были ранены и потеряли год.`;
+                }
+            }
+            
+            logEvent(message);
+            updateUI();
+            checkStatusUpgrade();
+        }
+
+        function courtService() {
+            const success = Math.random() > 0.5;
+            let message;
+            
+            if (success) {
+                const reputationGain = Math.floor(Math.random() * 15) + 5;
+                const kingGain = Math.floor(Math.random() * 10) + 5;
+                gameState.reputation += reputationGain;
+                gameState.king = Math.min(100, gameState.king + kingGain);
+                message = `Вы хорошо проявили себя при дворе. Репутация +${reputationGain}, отношения с Королем +${kingGain}.`;
+                
+                // Шанс получить землю
+                if (Math.random() > 0.8) {
+                    gameState.lands++;
+                    message += ` Король пожаловал вам участок земли!`;
+                }
+            } else {
+                const reputationLoss = Math.floor(Math.random() * 20) + 10;
+                const kingLoss = Math.floor(Math.random() * 15) + 5;
+                gameState.reputation = Math.max(0, gameState.reputation - reputationLoss);
+                gameState.king = Math.max(0, gameState.king - kingLoss);
+                message = `Вы допустили оплошность при дворе. Репутация -${reputationLoss}, отношения с Королем -${kingLoss}.`;
+            }
+            
+            logEvent(message);
+            updateUI();
+            checkStatusUpgrade();
+        }
+
+        function marry() {
+            if (gameState.dsm < 100) {
+                logEvent("У вас недостаточно ДСМ для заключения брака!");
+                return;
+            }
+            
+            const cost = Math.floor(Math.random() * 100) + 50;
+            if (gameState.dsm < cost) {
+                logEvent(`Вам не хватает ДСМ для выбранного брака. Нужно минимум ${cost} ДСМ.`);
+                return;
+            }
+            
+            gameState.dsm -= cost;
+            const reputationGain = Math.floor(Math.random() * 30) + 20;
+            gameState.reputation += reputationGain;
+            
+            logEvent(`Вы заключили выгодный брак! Потрачено ${cost} ДСМ, репутация +${reputationGain}.`);
+            
+            // Шанс получить землю или повышение
+            if (Math.random() > 0.6 && gameState.statusIndex < 6) {
+                gameState.statusIndex++;
+                logEvent(`Благодаря браку вы получили титул ${statuses[gameState.statusIndex].name}!`);
+                checkForAchievements();
+            } else if (Math.random() > 0.7) {
+                gameState.lands++;
+                logEvent(`В качестве приданого вы получили участок земли!`);
+            }
+            
+            updateUI();
+            checkStatusUpgrade();
+        }
+
+        function buyLand() {
+            const cost = 500;
+            if (gameState.dsm < cost) {
+                logEvent(`У вас недостаточно ДСМ для покупки земли. Нужно ${cost} ДСМ.`);
+                return;
+            }
+            
+            gameState.dsm -= cost;
+            gameState.lands++;
+            logEvent(`Вы купили участок земли за ${cost} ДСМ. Теперь у вас ${gameState.lands} участков.`);
+            updateUI();
+        }
+
+        function exploreRuins() {
+            const success = Math.random() > 0.6;
+            let message;
+            
+            if (success) {
+                const artifactFind = Math.random() > 0.7;
+                
+                if (artifactFind) {
+                    gameState.artifacts++;
+                    message = "Вы нашли артефакт Старого Мира! Но помните: использование запрещено Церковью.";
+                } else {
+                    const dsmGain = Math.floor(Math.random() * 200) + 100;
+                    gameState.dsm += dsmGain;
+                    message = `Вы нашли ценные ресурсы в руинах! ДСМ +${dsmGain}.`;
+                }
+                
+                // Риск для репутации
+                if (Math.random() > 0.5) {
+                    gameState.reputation -= 10;
+                    message += " Церковь не одобряет ваши исследования.";
+                }
+            } else {
+                const dsmLoss = Math.floor(Math.random() * 100) + 50;
+                gameState.dsm = Math.max(0, gameState.dsm - dsmLoss);
+                message = `Ваша экспедиция в руины была атакована мутантами! Вы потеряли ${dsmLoss} ДСМ.`;
+            }
+            
+            logEvent(message);
+            updateUI();
+        }
+
+        // Основной цикл игры
+        function endYear() {
+            gameState.year++;
+            gameState.age++;
+            
+            // Для холопов - обязательные расходы
+            if (gameState.statusIndex === 0) {
+                const expenses = 10 + Math.floor(gameState.age / 5);
+                gameState.dsm = Math.max(0, gameState.dsm - expenses);
+                logEvent(`Вы потратили ${expenses} ДСМ на обязательные расходы холопа.`);
+                
+                // Шанс увеличения долга
+                if (gameState.dsm < 5 && Math.random() > 0.4) {
+                    gameState.workDebt += 20;
+                    logEvent("Вы не смогли оплатить все повинности. Ваш долг увеличился.");
+                }
+            } else {
+                // Для свободных - обычные расходы
+                const expenses = 30 + (gameState.statusIndex * 15);
+                gameState.dsm = Math.max(0, gameState.dsm - expenses);
+                logEvent(`Вы потратили ${expenses} ДСМ на проживание и содержание.`);
+            }
+            
+            // Доход с земель
+            if (gameState.lands > 0) {
+                const income = gameState.lands * 100;
+                gameState.dsm += income;
+                logEvent(`За год вы получили ${income} ДСМ дохода с ваших земель.`);
+            }
+            
+            // Для беглых холопов - риск быть пойманным
+            if (gameState.escapeRisk) {
+                if (Math.random() * 100 < gameState.escapeRisk) {
+                    logEvent("Вас опознали как беглого холопа! Снова в кабалу...");
+                    gameState.statusIndex = 0;
+                    gameState.reputation = 5;
+                    gameState.dsm = 0;
+                    gameState.workDebt = 200;
+                    gameState.escapeRisk = 0;
+                    generateActions();
+                } else {
+                    logEvent("Вам удалось избежать обнаружения в этом году.");
+                    gameState.escapeRisk += 5; // Риск увеличивается каждый год
+                }
+            }
+            
+            // Случайное событие
+            randomEvent();
+            
+            // Проверка на смерть от старости
+            if (gameState.age >= 70) {
+                if (Math.random() > 0.3) {
+                    endGame("Вы умерли от старости, так и не достигнув вершины Лествицы Чинов.");
+                    return;
+                }
+            }
+            
+            // Проверка на повышение статуса
+            checkStatusUpgrade();
+            checkFreedomConditions();
+            
+            updateUI();
+        }
+
+        function randomEvent() {
+            const events = [
+                {
+                    condition: () => true,
+                    message: "Прошел обычный год без значимых событий.",
+                    effect: () => {}
+                },
+                {
+                    condition: () => Math.random() > 0.7,
+                    message: "Неурожайный год! Доход с земель уменьшен.",
+                    effect: () => {
+                        if (gameState.lands > 0) {
+                            const loss = gameState.lands * 50;
+                            gameState.dsm = Math.max(0, gameState.dsm - loss);
+                        }
+                    }
+                },
+                {
+                    condition: () => gameState.church < 70 && Math.random() > 0.5,
+                    message: "Жрец обвинил вас в недостаточной набожности. Репутация пострадала.",
+                    effect: () => {
+                        gameState.reputation = Math.max(0, gameState.reputation - 15);
+                    }
+                },
+                {
+                    condition: () => gameState.king < 50 && Math.random() > 0.6,
+                    message: "Король недоволен вами. Отношения с Королем ухудшились.",
+                    effect: () => {
+                        gameState.king = Math.max(0, gameState.king - 20);
+                    }
+                },
+                {
+                    condition: () => gameState.lands > 0 && Math.random() > 0.8,
+                    message: "На ваши земли напали мутанты! Вы потеряли один участок.",
+                    effect: () => {
+                        gameState.lands = Math.max(0, gameState.lands - 1);
+                    }
+                },
+                {
+                    condition: () => gameState.dsm > 1000 && Math.random() > 0.9,
+                    message: "Вы нашли древний артефакт! Продав его Церкви, вы получили ДСМ.",
+                    effect: () => {
+                        const gain = Math.floor(Math.random() * 500) + 200;
+                        gameState.dsm += gain;
+                        gameState.church = Math.min(100, gameState.church + 5);
+                    }
+                },
+                {
+                    condition: () => gameState.statusIndex >= 5 && Math.random() > 0.85,
+                    message: "Вы получили приглашение на королевский турнир!",
+                    effect: () => {
+                        const win = Math.random() > 0.5;
+                        if (win) {
+                            gameState.reputation += 30;
+                            gameState.dsm += 300;
+                            logEvent("Вы победили в турнире! Репутация и ДСМ значительно выросли.");
+                        } else {
+                            gameState.reputation -= 10;
+                            logEvent("Вы проиграли в первом же поединке. Репутация немного пострадала.");
+                        }
+                    }
+                }
+            ];
+            
+            const availableEvents = events.filter(event => event.condition());
+            if (availableEvents.length > 0) {
+                const event = availableEvents[Math.floor(Math.random() * availableEvents.length)];
+                logEvent(event.message);
+                event.effect();
+            }
+        }
+
+        function checkStatusUpgrade() {
+            const currentStatus = statuses[gameState.statusIndex];
+            const nextStatus = statuses[gameState.statusIndex + 1];
+            
+            if (nextStatus && 
+                gameState.reputation >= nextStatus.minReputation && 
+                gameState.dsm >= nextStatus.minDsm) {
+                gameState.statusIndex++;
+                logEvent(`Поздравляем! Вы достигли нового статуса: ${nextStatus.name}`);
+                
+                if (nextStatus.name === "Король") {
+                    endGame("Вы достигли вершины Лествицы Чинов! Теперь вы Король Драхенланда!");
+                } else {
+                    checkForAchievements();
+                }
+            }
+        }
+
+        function checkForAchievements() {
+            const status = statuses[gameState.statusIndex];
+            const achievementName = `Достижение: ${status.name}`;
+            
+            if (!gameState.achievements.includes(achievementName)) {
+                gameState.achievements.push(achievementName);
+                
+                const achievementEl = document.createElement('div');
+                achievementEl.className = 'achievement';
+                achievementEl.textContent = `Вы достигли статуса ${status.name}!`;
+                eventLogEl.appendChild(achievementEl);
+                eventLogEl.scrollTop = eventLogEl.scrollHeight;
+            }
+        }
+
+        function endGame(message) {
+            logEvent(message);
+            logEvent("Игра окончена.");
+            
+            gameState.gameOver = true;
+            
+            // Создаем сообщение об окончании игры
+            const gameOverEl = document.createElement('div');
+            gameOverEl.className = 'game-over';
+            gameOverEl.innerHTML = `
+                <h3>${message}</h3>
+                <p>Ваш путь по Лествице Чинов завершен.</p>
+                <p>Статус: ${statuses[gameState.statusIndex].name}</p>
+                <p>Возраст: ${gameState.age} лет</p>
+                <p>Итоговая репутация: ${gameState.reputation}</p>
+                <button class="restart-button" onclick="location.reload()">Начать заново</button>
+            `;
+            
+            gameOverContainer.appendChild(gameOverEl);
+            gameOverContainer.style.display = 'block';
+            
+            // Отключить все кнопки
+            const buttons = actionButtonsEl.querySelectorAll('button');
+            buttons.forEach(button => {
+                button.disabled = true;
+            });
+        }
+
+        // Запуск игры при загрузке
+        window.onload = initGame;
+    </script>
+</body>
+</html>
